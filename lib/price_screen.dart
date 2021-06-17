@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 const api_key = "928ACA3B-3D9C-456B-8956-4D58C8507BC2";
 
@@ -15,15 +13,19 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
-  String rate = '0';
+  String BTCrate = '?';
+  String ETHrate = '?';
+  String LTCrate = '?';
 
   @override
   void initState() {
     super.initState();
-    getRate();
+    getBTCRate();
+    getETHRate();
+    getLTCRate();
   }
 
-  Future<dynamic> getRate() async {
+  Future<dynamic> getBTCRate() async {
     Uri url = Uri.https('rest.coinapi.io',
         '/v1/exchangerate/BTC/$selectedCurrency', {'apikey': '$api_key'});
 
@@ -31,8 +33,34 @@ class _PriceScreenState extends State<PriceScreen> {
     var coinData = await networkHelper.getData();
     setState(() {
       double r = coinData['rate'];
-      rate = r.toStringAsFixed(4);
-      print("Current Rate for $selectedCurrency is $rate");
+      BTCrate = r.toStringAsFixed(4);
+      print("Current Rate for Bitcoin in $selectedCurrency is $BTCrate");
+    });
+  }
+
+  Future<dynamic> getETHRate() async {
+    Uri url = Uri.https('rest.coinapi.io',
+        '/v1/exchangerate/ETH/$selectedCurrency', {'apikey': '$api_key'});
+
+    NetworkHelper networkHelper = NetworkHelper(url);
+    var coinData = await networkHelper.getData();
+    setState(() {
+      double r = coinData['rate'];
+      ETHrate = r.toStringAsFixed(4);
+      print("Current Rate for Etherium in $selectedCurrency is $ETHrate");
+    });
+  }
+
+  Future<dynamic> getLTCRate() async {
+    Uri url = Uri.https('rest.coinapi.io',
+        '/v1/exchangerate/LTC/$selectedCurrency', {'apikey': '$api_key'});
+
+    NetworkHelper networkHelper = NetworkHelper(url);
+    var coinData = await networkHelper.getData();
+    setState(() {
+      double r = coinData['rate'];
+      LTCrate = r.toStringAsFixed(4);
+      print("Current Rate for LTC in $selectedCurrency is $LTCrate");
     });
   }
 
@@ -53,7 +81,9 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
-          getRate();
+          getBTCRate();
+          getETHRate();
+          getLTCRate();
           print(selectedCurrency);
         });
       },
@@ -95,26 +125,34 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $rate $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+                child: CardWidget(
+                  rate: BTCrate,
+                  selectedCurrency: selectedCurrency,
+                  coin: 'BTC',
                 ),
               ),
-            ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 5.0, 18.0, 0),
+                child: CardWidget(
+                  rate: ETHrate,
+                  selectedCurrency: selectedCurrency,
+                  coin: 'ETH',
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.0, 5.0, 18.0, 0),
+                child: CardWidget(
+                  rate: LTCrate,
+                  selectedCurrency: selectedCurrency,
+                  coin: 'LTC',
+                ),
+              ),
+            ],
           ),
           Container(
             height: 150.0,
@@ -124,6 +162,36 @@ class _PriceScreenState extends State<PriceScreen> {
             child: getPicker(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CardWidget extends StatelessWidget {
+  CardWidget(
+      {@required this.rate,
+      @required this.selectedCurrency,
+      @required this.coin});
+  final String rate;
+  final String selectedCurrency;
+  final String coin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.lightBlueAccent,
+      elevation: 5.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+        child: Text(
+          '1 $coin = $rate $selectedCurrency',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
     );
   }
