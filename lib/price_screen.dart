@@ -119,7 +119,7 @@ class _PriceScreenState extends State<PriceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bitcoin Tracker'),
+        title: Text('Coin Tracker'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
